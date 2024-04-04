@@ -13,12 +13,12 @@ public struct QuizFlow {
 
     @ObservableState
     public struct State: Equatable {
-        var question: Question
-        var answer: Answer?
-        var questionNumber: Int
+        var questions: [Question]
+        var answers: [Answer] = []
+        var currentAnswer: Answer?
+        var currentQuestion: Question
+        var currentQuestionNumber: Int = 0
         var isLoading = false
-        var totalQuestions: Int
-        var questionsSubmitted: Int
         var temporaryAnswer: Answer = .init()
         var screenState: ScreenState = .initial
 
@@ -46,13 +46,6 @@ public struct QuizFlow {
         case answerSubmittedWithError
         case setAnswer(String)
         case isLoading
-        case delegate(Delegate)
-
-        public enum Delegate: Equatable {
-            case previous
-            case next
-            case submitAnswer(Answer)
-        }
     }
 
     @Dependency(\.answerClient) var answerDependency
@@ -60,10 +53,6 @@ public struct QuizFlow {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .nextButtonTapped:
-                return .send(.delegate(.next))
-            case .previousButtonTapped:
-                return .send(.delegate(.previous))
             case .submitButtonTapped:
                 state.isLoading = true
                 let answer = state.temporaryAnswer
@@ -83,23 +72,39 @@ public struct QuizFlow {
                 return .none
             case let .setAnswer(value):
                 if !value.isEmpty {
-                    state.temporaryAnswer = Answer(id: state.question.id,
+                    state.temporaryAnswer = Answer(id: state.currentQuestion.id,
                                                    value: value)
                 }
                 return .none
             case .answerSubmittedWithSuccess:
                 state.isLoading = false
                 state.screenState = .success
-                let answer = state.temporaryAnswer
+                state.answers.append(state.temporaryAnswer)
+                state.temporaryAnswer = .init()
+                if state.answers.count == state.questions.count {
+                    print ("Finished")
+                }
                 return .run { send in
                     try await Task.sleep(for: .seconds(1))
-                    await send(.delegate(.submitAnswer(answer)))
+                    await send(.nextButtonTapped)
                 }
             case .answerSubmittedWithError:
                 state.isLoading = false
                 state.screenState = .shouldRetry
                 return .none
-            default:
+            case .nextButtonTapped:
+                if state.currentQuestionNumber < state.questions.count - 1 {
+                    state.currentQuestionNumber += 1
+                    state.currentQuestion = state.questions[state.currentQuestionNumber]
+                    state.currentAnswer = state.answers.first { $0.id == state.currentQuestion.id }
+                }
+                state.screenState = .initial
+                return .none
+            case .previousButtonTapped:
+                state.currentQuestionNumber -= 1
+                state.currentQuestion = state.questions[state.currentQuestionNumber]
+                state.currentAnswer = state.answers.first { $0.id == state.currentQuestion.id }
+                state.screenState = .initial
                 return .none
             }
         }

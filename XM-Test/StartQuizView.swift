@@ -9,55 +9,46 @@ import SwiftUI
 import ComposableArchitecture
 
 struct StartQuizView: View {
-
+    
     @Bindable var store: StoreOf<StartQuizFlow>
-
+    
     var body: some View {
-        NavigationStack {
-            if store.isLoading {
-                ProgressView()
-            } else {
-                VStack {
-                    Spacer()
-                    startSurveyButton
-                    Spacer()
-                }
+        contentView
+            .onAppear {
+                store.send(.fetchQuestions)
             }
-        }
-        .fullScreenCover(
-            item: $store.scope(state: \.destination?.quizFlow, action: \.destination.quizFlow)
-        ) { quizStore in
-            NavigationStack {
-                QuizView(store: quizStore)
-            }
-        }
-        .navigationTitle("Welcome")
-        .alert($store.scope(state: \.destination?.alert,
-                            action: \.destination.alert))
     }
-
-    // MARK: - Subviews
-
-    private var startSurveyButton: some View {
-        Button {
-            store.send(.startTapped)
-        } label: {
-            Text("Start survey")
-                .padding(.horizontal, 100)
-                .padding(.vertical, 20)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
+    
+    @ViewBuilder
+    var contentView: some View {
+        if store.isLoading {
+            ProgressView()
+        } else if let firstQuestion = store.questions.first {
+            NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
+                NavigationLink(state: QuizFlow.State(questions: store.questions, currentQuestion: firstQuestion)) {
+                    Text("Start survey")
+                        .padding(.horizontal, 100)
+                        .padding(.vertical, 20)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            } destination: { store in
+                QuizView(store: store)
+            }
+            .navigationTitle("Welcome")
+            .alert($store.scope(state: \.destination?.alert,
+                                action: \.destination.alert))
         }
     }
 }
 
 #if DEBUG
-    struct StartQuizView_Previews: PreviewProvider {
-        static var previews: some View {
-            StartQuizView(store: .init(initialState: StartQuizFlow.State(), reducer: {
-                StartQuizFlow()
-            }))
-        }
+struct StartQuizView_Previews: PreviewProvider {
+    static var previews: some View {
+        StartQuizView(store: .init(initialState: StartQuizFlow.State(), reducer: {
+            StartQuizFlow()
+        }))
     }
+}
 #endif
