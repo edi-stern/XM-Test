@@ -16,10 +16,10 @@ public struct StartQuizFlow {
         @Presents var destination: Destination.State?
 
         var questions: [Question] = []
-        var answers: [Answer] = []
+        var answers:  [Answer] = []
         var isLoading = false
         var errorMessage: String? = nil
-        var questionNumber = 0
+        var questionNumber = 1
     }
 
     public enum Action {
@@ -73,11 +73,10 @@ public struct StartQuizFlow {
                 if state.questionNumber < state.questions.count {
                     state.questionNumber += 1
                     return .send(.startQuiz)
-                } else if state.answers.count < state.questions.count {
-                    return .send(.errorReceived("You finished the survey"))
-                } else {
+                } else if state.answers.count == state.questions.count {
                     return .send(.errorReceived("You finished the survey"))
                 }
+                return .none
             case .destination(.presented(.quizFlow(.delegate(.next)))):
                 state.questionNumber += 1
                 return .send(.startQuiz)
