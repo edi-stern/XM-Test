@@ -44,7 +44,9 @@ public struct QuizFlow {
         case submitButtonTapped
         case answerSubmittedWithSuccess
         case answerSubmittedWithError
+        case update(Int)
         case setAnswer(String)
+        case surveyFinished
         case isLoading
     }
 
@@ -81,30 +83,29 @@ public struct QuizFlow {
                 state.screenState = .success
                 state.answers.append(state.temporaryAnswer)
                 state.temporaryAnswer = .init()
-                if state.answers.count == state.questions.count {
-                    print ("Finished")
-                }
+                let finishedSurvey = state.answers.count == state.questions.count
                 return .run { send in
                     try await Task.sleep(for: .seconds(1))
-                    await send(.nextButtonTapped)
+                    await send(finishedSurvey ? .surveyFinished : .nextButtonTapped)
                 }
             case .answerSubmittedWithError:
                 state.isLoading = false
                 state.screenState = .shouldRetry
                 return .none
             case .nextButtonTapped:
-                if state.currentQuestionNumber < state.questions.count - 1 {
-                    state.currentQuestionNumber += 1
-                    state.currentQuestion = state.questions[state.currentQuestionNumber]
-                    state.currentAnswer = state.answers.first { $0.id == state.currentQuestion.id }
-                }
-                state.screenState = .initial
-                return .none
+                return .send(.update(state.currentQuestionNumber + 1))
             case .previousButtonTapped:
-                state.currentQuestionNumber -= 1
-                state.currentQuestion = state.questions[state.currentQuestionNumber]
-                state.currentAnswer = state.answers.first { $0.id == state.currentQuestion.id }
-                state.screenState = .initial
+                return .send(.update(state.currentQuestionNumber - 1))
+            case let .update(newIndex):
+                guard newIndex >= 0 && newIndex < state.questions.count else {
+                    return
+                }
+
+                state.currentQuestionNumber = newIndex
+                let newQuestion = state.questions[newIndex]
+                state.currentQuestion = newQuestion
+                state.currentAnswer = state.answers.first { $0.id == newQuestion.id }
+            case .surveyFinished:
                 return .none
             }
         }
