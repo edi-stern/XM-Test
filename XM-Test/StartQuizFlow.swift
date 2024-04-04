@@ -70,8 +70,14 @@ public struct StartQuizFlow {
                 return .none
             case let .destination(.presented(.quizFlow(.delegate(.submitAnswer(answer))))):
                 state.answers.append(answer)
-                state.questionNumber += 1
-                return .send(.startQuiz)
+                if state.questionNumber < state.questions.count {
+                    state.questionNumber += 1
+                    return .send(.startQuiz)
+                } else if state.answers.count < state.questions.count {
+                    return .send(.errorReceived("You finished the survey"))
+                } else {
+                    return .send(.errorReceived("You finished the survey"))
+                }
             case .destination(.presented(.quizFlow(.delegate(.next)))):
                 state.questionNumber += 1
                 return .send(.startQuiz)
