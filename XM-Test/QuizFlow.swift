@@ -13,14 +13,29 @@ public struct QuizFlow {
 
     @ObservableState
     public struct State: Equatable {
-        var question: Question = .init()
-        var answer: Answer? = nil
-        var questionNumber: Int = 0
+        var question: Question
+        var answer: Answer?
+        var questionNumber: Int
         var isLoading = false
-        var totalQuestions = 0
-        var questionsSubmitted = 0
+        var totalQuestions: Int
+        var questionsSubmitted: Int
         var temporaryAnswer: Answer = .init()
-        var shouldRetry = false
+        var screenState: ScreenState = .initial
+
+        public enum ScreenState {
+            case initial
+            case shouldRetry
+            case success
+
+            var title: String {
+                switch self {
+                case .initial:
+                    return "Submit"
+                default:
+                    return "Retry"
+                }
+            }
+        }
     }
 
     public enum Action {
@@ -74,11 +89,15 @@ public struct QuizFlow {
                 return .none
             case .answerSubmittedWithSuccess:
                 state.isLoading = false
-                state.shouldRetry = false
-                return .send(.delegate(.submitAnswer(state.temporaryAnswer)))
+                state.screenState = .success
+                let answer = state.temporaryAnswer
+                return .run { send in
+                    try await Task.sleep(for: .seconds(1))
+                    await send(.delegate(.submitAnswer(answer)))
+                }
             case .answerSubmittedWithError:
                 state.isLoading = false
-                state.shouldRetry = true
+                state.screenState = .shouldRetry
                 return .none
             default:
                 return .none

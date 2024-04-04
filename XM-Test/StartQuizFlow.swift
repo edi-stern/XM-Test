@@ -19,7 +19,7 @@ public struct StartQuizFlow {
         var answers:  [Answer] = []
         var isLoading = false
         var errorMessage: String? = nil
-        var questionNumber = 1
+        var questionNumber = 0
     }
 
     public enum Action {
@@ -70,7 +70,7 @@ public struct StartQuizFlow {
                 return .none
             case let .destination(.presented(.quizFlow(.delegate(.submitAnswer(answer))))):
                 state.answers.append(answer)
-                if state.questionNumber < state.questions.count {
+                if state.questionNumber < state.questions.count - 1 {
                     state.questionNumber += 1
                     return .send(.startQuiz)
                 } else if state.answers.count == state.questions.count {

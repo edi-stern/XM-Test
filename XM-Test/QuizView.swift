@@ -19,22 +19,40 @@ struct QuizView: View {
                 VStack(spacing: 20) {
                     header
                     questionText
-                    answerTextField
+                    if store.screenState != .success {
+                        answerTextField
+                    }
                     Spacer()
-                    submitButton
+                    if store.screenState != .success {
+                        submitButton
+                    }
                 }
                 .padding(.horizontal, 30)
                 .navigationBarTitle("Question \(store.questionNumber + 1)/\(store.totalQuestions)")
                 .toolbar {
                     navigationButtons
                 }
-                .background(store.shouldRetry ? Color.red : Color.clear)
+                .background(backgroundColor)
             }
         }
     }
-    
+
+    // MARK: - Colors
+
+    private var backgroundColor: Color {
+        switch store.screenState {
+        case .initial:
+            return .clear
+        case .shouldRetry:
+            return .red
+        case .success:
+            return .green
+        }
+    }
+
+
     // MARK: - Subviews
-    
+
     private var textSubmittedQuestions: some View {
         Text("Questions submitted: \(store.questionsSubmitted)")
     }
@@ -69,7 +87,7 @@ struct QuizView: View {
         Button(action: {
             store.send(.submitButtonTapped)
         }) {
-            Text(store.shouldRetry ? "Retry" : "Submit")
+            Text(store.screenState.title)
                 .padding(.horizontal, 100)
                 .padding(.vertical, 20)
                 .background(store.answer != nil || store.temporaryAnswer.value.isEmpty ? Color.gray : Color.blue)
@@ -98,5 +116,5 @@ struct QuizView: View {
 }
 
 #Preview {
-    QuizView(store: .init(initialState: QuizFlow.State(question: .init(id: 0, question: "What is your favorite food")), reducer: { QuizFlow() }))
+    QuizView(store: .init(initialState: QuizFlow.State.init(question: .init(id: 0, question: "What is your favorite food"), questionNumber: 1, totalQuestions: 10, questionsSubmitted: 2), reducer: { QuizFlow() }))
 }
