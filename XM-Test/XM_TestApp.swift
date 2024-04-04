@@ -12,8 +12,9 @@ import ComposableArchitecture
 struct XM_TestApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView(store: Store(initialState: StartQuizFlow.State(), reducer: {
+            StartQuizView(store: Store(initialState: StartQuizFlow.State(), reducer: {
                 StartQuizFlow()
+                    ._printChanges()
             }))
         }
     }
