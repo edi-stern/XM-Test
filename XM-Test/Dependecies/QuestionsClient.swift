@@ -8,7 +8,7 @@
 import Foundation
 import ComposableArchitecture
 
-// Here a network layer should be implemented if we want to scale up the project
+// TODO: Move logic into network layer
 
 struct QuestionsClient {
     var getQuestions: () async throws -> [Question]

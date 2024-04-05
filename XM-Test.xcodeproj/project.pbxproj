@@ -11,7 +11,6 @@
 		445F98832BBE9314004D2359 /* StartQuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445F98822BBE9314004D2359 /* StartQuizView.swift */; };
 		445F98852BBE9316004D2359 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 445F98842BBE9316004D2359 /* Assets.xcassets */; };
 		445F98882BBE9316004D2359 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 445F98872BBE9316004D2359 /* Preview Assets.xcassets */; };
-		445F98922BBE9316004D2359 /* XM_TestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445F98912BBE9316004D2359 /* XM_TestTests.swift */; };
 		445F989C2BBE9316004D2359 /* XM_TestUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445F989B2BBE9316004D2359 /* XM_TestUITests.swift */; };
 		445F989E2BBE9316004D2359 /* XM_TestUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445F989D2BBE9316004D2359 /* XM_TestUITestsLaunchTests.swift */; };
 		445F98AC2BBE949B004D2359 /* StartQuizFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445F98AB2BBE949B004D2359 /* StartQuizFlow.swift */; };
@@ -53,7 +52,6 @@
 		445F98842BBE9316004D2359 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		445F98872BBE9316004D2359 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		445F988D2BBE9316004D2359 /* XM-TestTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "XM-TestTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		445F98912BBE9316004D2359 /* XM_TestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XM_TestTests.swift; sourceTree = "<group>"; };
 		445F98972BBE9316004D2359 /* XM-TestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "XM-TestUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		445F989B2BBE9316004D2359 /* XM_TestUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XM_TestUITests.swift; sourceTree = "<group>"; };
 		445F989D2BBE9316004D2359 /* XM_TestUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XM_TestUITestsLaunchTests.swift; sourceTree = "<group>"; };
@@ -145,7 +143,6 @@
 		445F98902BBE9316004D2359 /* XM-TestTests */ = {
 			isa = PBXGroup;
 			children = (
-				445F98912BBE9316004D2359 /* XM_TestTests.swift */,
 				445F98BF2BBEADD4004D2359 /* QuestionMock.swift */,
 				445F98C92BBFC2CE004D2359 /* AnswerMock.swift */,
 				445F98BA2BBEA760004D2359 /* StartQuizFlowTests.swift */,
@@ -360,7 +357,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				445F98922BBE9316004D2359 /* XM_TestTests.swift in Sources */,
 				445F98CA2BBFC2CE004D2359 /* AnswerMock.swift in Sources */,
 				44D6981E2BBFCFAE0009B9FB /* QuizFlowTests.swift in Sources */,
 				445F98BB2BBEA760004D2359 /* StartQuizFlowTests.swift in Sources */,
