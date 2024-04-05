@@ -10,31 +10,31 @@ import ComposableArchitecture
 
 @Reducer
 public struct StartQuizFlow {
-
+    
     @ObservableState
     public struct State: Equatable {
-        @Presents var destination: Destination.State?
+        @Presents var alert: AlertState<Action.Alert>?
         var path = StackState<QuizFlow.State>()
         
         var questions: [Question] = []
         var isLoading = true
-        var errorMessage: String? = nil
+        var errorMessage: String = ""
     }
-
+    
     public enum Action {
         case fetchQuestions
         case questionsReceived([Question])
         case errorReceived(String)
-        case destination(PresentationAction<Destination.Action>)
+        case alert(PresentationAction<Alert>)
         case path(StackAction<QuizFlow.State, QuizFlow.Action>)
-
+        
         public enum Alert: Equatable {
-            case presentError(String)
+            case presentError
         }
     }
-
+    
     @Dependency(\.questionsClient) var questionsDependency
-
+    
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
@@ -48,33 +48,31 @@ public struct StartQuizFlow {
                             await send(.questionsReceived(questions))
                         }
                     } catch {
-                        await send(.errorReceived("Error fetching questions: \(error)"))
+                        await send(.errorReceived("Error fetching questions: \(error.localizedDescription)"))
                     }
                 }
             case let .questionsReceived(questions):
                 state.isLoading = false
                 state.questions = questions
                 return .none
-            case let .errorReceived(error):
+            case let .errorReceived(errorMessage):
                 state.isLoading = false
-                state.destination = .alert(AlertState {
-                    TextState(error)
-                })
+                state.errorMessage = errorMessage
+                return .send(.alert(.presented(.presentError)))
+            case .alert(.presented(.presentError)):
+                state.alert = AlertState {
+                    TextState(state.errorMessage)
+                }
                 return .none
-            default:
+            case .alert:
+                return .none
+            case .path:
                 return .none
             }
         }
-        .ifLet(\.$destination, action: \.destination)
+        .ifLet(\.$alert, action: \.alert)
         .forEach(\.path, action: \.path) {
             QuizFlow()
         }
-    }
-}
-
-extension StartQuizFlow {
-    @Reducer(state: .equatable)
-    public enum Destination {
-        case alert(AlertState<StartQuizFlow.Action.Alert>)
     }
 }

@@ -13,26 +13,39 @@ public struct QuizFlow {
 
     @ObservableState
     public struct State: Equatable {
+        @Presents var alert: AlertState<Action.Alert>?
+        
         var questions: [Question]
         var answers: [Answer] = []
         var currentAnswer: Answer?
         var currentQuestion: Question
-        var currentQuestionNumber: Int = 0
+        var currentIndex: Int = 0
         var isLoading = false
         var temporaryAnswer: Answer = .init()
-        var screenState: ScreenState = .initial
+        var resultState: ResultState = .initial
 
-        public enum ScreenState {
+        public enum ResultState {
             case initial
-            case shouldRetry
+            case error
             case success
 
-            var title: String {
+            var buttonTitle: String {
                 switch self {
                 case .initial:
                     return "Submit"
                 default:
                     return "Retry"
+                }
+            }
+
+            var resultTitle: String {
+                switch self {
+                case .initial:
+                    return ""
+                case .error:
+                    return "Failure!"
+                case .success:
+                    return "Success"
                 }
             }
         }
@@ -48,6 +61,11 @@ public struct QuizFlow {
         case setAnswer(String)
         case surveyFinished
         case isLoading
+        case alert(PresentationAction<Alert>)
+
+        public enum Alert: Equatable {
+            case presentSurveyFinished
+        }
     }
 
     @Dependency(\.answerClient) var answerDependency
@@ -80,7 +98,7 @@ public struct QuizFlow {
                 return .none
             case .answerSubmittedWithSuccess:
                 state.isLoading = false
-                state.screenState = .success
+                state.resultState = .success
                 state.answers.append(state.temporaryAnswer)
                 state.temporaryAnswer = .init()
                 let finishedSurvey = state.answers.count == state.questions.count
@@ -90,24 +108,34 @@ public struct QuizFlow {
                 }
             case .answerSubmittedWithError:
                 state.isLoading = false
-                state.screenState = .shouldRetry
+                state.resultState = .error
                 return .none
             case .nextButtonTapped:
-                return .send(.update(state.currentQuestionNumber + 1))
+                return .send(.update(state.currentIndex + 1))
             case .previousButtonTapped:
-                return .send(.update(state.currentQuestionNumber - 1))
+                return .send(.update(state.currentIndex - 1))
             case let .update(newIndex):
+                state.resultState = .initial
                 guard newIndex >= 0 && newIndex < state.questions.count else {
-                    return
+                    return .none
                 }
 
-                state.currentQuestionNumber = newIndex
+                state.currentIndex = newIndex
                 let newQuestion = state.questions[newIndex]
                 state.currentQuestion = newQuestion
                 state.currentAnswer = state.answers.first { $0.id == newQuestion.id }
+                return .none
             case .surveyFinished:
+                return .send(.alert(.presented(.presentSurveyFinished)))
+            case .alert(.presented(.presentSurveyFinished)):
+                state.alert = AlertState {
+                    TextState("Thank you for responding to all our questions!")
+                }
+                return .none
+            case .alert:
                 return .none
             }
         }
+        .ifLet(\.$alert, action: \.alert)
     }
 }

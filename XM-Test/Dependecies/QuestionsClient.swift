@@ -8,6 +8,8 @@
 import Foundation
 import ComposableArchitecture
 
+// Here a network layer should be implemented if we want to scale up the project
+
 struct QuestionsClient {
     var getQuestions: () async throws -> [Question]
 }
@@ -15,7 +17,8 @@ struct QuestionsClient {
 extension QuestionsClient: DependencyKey {
     static let liveValue: QuestionsClient  = Self(
         getQuestions: {
-            let url = URL(string: "https://xm-assignment.web.app/questions")!
+            
+            let url = URL(string: "\(Constants.baseURL)/questions")!
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoder = JSONDecoder()
             let questions = try decoder.decode([Question].self, from: data)

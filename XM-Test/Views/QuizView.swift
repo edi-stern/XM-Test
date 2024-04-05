@@ -18,30 +18,31 @@ struct QuizView: View {
             VStack(spacing: 20) {
                 header
                 questionText
-                if store.screenState != .success {
+                if store.resultState != .success {
                     answerTextField
                 }
                 Spacer()
-                if store.screenState != .success {
+                resultView
+                if store.resultState != .success {
                     submitButton
                 }
             }
             .padding(.horizontal, 30)
-            .navigationBarTitle("Question \(store.currentQuestionNumber + 1)/\(store.questions.count)")
+            .navigationBarTitle("Question \(store.currentIndex + 1)/\(store.questions.count)")
             .toolbar {
                 navigationButtons
             }
-            .background(backgroundColor)
+            .alert($store.scope(state: \.alert, action: \.alert))
         }
     }
 
     // MARK: - Colors
 
     private var backgroundColor: Color {
-        switch store.screenState {
+        switch store.resultState {
         case .initial:
             return .clear
-        case .shouldRetry:
+        case .error:
             return .red
         case .success:
             return .green
@@ -84,12 +85,26 @@ struct QuizView: View {
         .foregroundColor(store.currentAnswer != nil ? .black : .gray)
     }
 
+    // Result View
+    private var resultView: some View {
+        HStack {
+            Spacer()
+            Text(store.resultState.resultTitle)
+                .font(.title)
+                .multilineTextAlignment(.center)
+                .padding()
+            Spacer()
+        }
+        .frame(width: 500, height: 150)
+        .background(backgroundColor)
+    }
+
     // Submit Button
     private var submitButton: some View {
         Button(action: {
             store.send(.submitButtonTapped)
         }) {
-            Text(store.screenState.title)
+            Text(store.resultState.buttonTitle)
                 .padding(.horizontal, 100)
                 .padding(.vertical, 20)
                 .background(store.currentAnswer != nil || store.temporaryAnswer.value.isEmpty ? Color.gray : Color.blue)
@@ -105,14 +120,14 @@ struct QuizView: View {
             Button("Previous") {
                 store.send(.previousButtonTapped)
             }
-            .disabled(store.currentQuestionNumber == 0)
+            .disabled(store.currentIndex == 0)
 
             Spacer()
 
             Button("Next") {
                 store.send(.nextButtonTapped)
             }
-            .disabled(store.currentQuestionNumber == store.questions.count - 1)
+            .disabled(store.currentIndex == store.questions.count - 1)
         }
     }
 }

@@ -14,7 +14,7 @@ struct AnswerClient {
 
 extension AnswerClient: DependencyKey {
     static let liveValue: AnswerClient  = Self { answer in
-        let url = URL(string: "https://xm-assignment.web.app/question/submit")!
+        let url = URL(string: "\(Constants.baseURL)/question/submit")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = try JSONEncoder().encode(answer)

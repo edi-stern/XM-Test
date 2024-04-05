@@ -17,6 +17,7 @@ struct StartQuizView: View {
             .onAppear {
                 store.send(.fetchQuestions)
             }
+            .alert($store.scope(state: \.alert, action: \.alert))
     }
     
     @ViewBuilder
@@ -37,8 +38,6 @@ struct StartQuizView: View {
                 QuizView(store: store)
             }
             .navigationTitle("Welcome")
-            .alert($store.scope(state: \.destination?.alert,
-                                action: \.destination.alert))
         }
     }
 }
